@@ -8,10 +8,8 @@ def word_match(word,dictionary):
             result = (dictionary[i][1], dictionary[i][0][1]) #結果 点数
             return result
     
-def count_binary_search_all(word):
+def count_binary_search_all(word,WORD_SCORES):
     word_count = {ch : 0 for ch in string.ascii_lowercase}
-    SCORES = [1, 3, 2, 2, 1, 3, 3, 1, 1, 4, 4, 2, 2, 1, 1, 3, 4, 1, 1, 1, 2, 3, 3, 4, 3, 4]
-    WORD_SCORES = {ch: i for ch, i in zip(string.ascii_lowercase, SCORES)}
     scores = 0
     for i in range(len(word)):
         word_count[word[i]] += 1
@@ -44,11 +42,14 @@ with open("words.txt", mode='r') as f1, open("large.txt", mode="r") as f2, open(
 
     test_word_count = []
     dictionary_word_count = []
+    
+    SCORES = [1, 3, 2, 2, 1, 3, 3, 1, 1, 4, 4, 2, 2, 1, 1, 3, 4, 1, 1, 1, 2, 3, 3, 4, 3, 4]
+    WORD_SCORES = {ch: i for ch, i in zip(string.ascii_lowercase, SCORES)}
     for i in range(len(test_word)):
-        test_word_count.append(count_binary_search_all(test_word[i]))
+        test_word_count.append(count_binary_search_all(test_word[i],WORD_SCORES))
 
     for i in range(len(dictionary_word)):
-        dictionary_word_count.append((count_binary_search_all(dictionary_word[i]),dictionary_word[i]))
+        dictionary_word_count.append((count_binary_search_all(dictionary_word[i],WORD_SCORES),dictionary_word[i]))
 
     dictionary_word_count.sort(key=lambda x: x[0][1], reverse=True)
 

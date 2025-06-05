@@ -52,14 +52,11 @@ class HashTable:
         self.bucket_size = 97
         self.buckets = [None] * self.bucket_size
         self.item_count = 0 #格納されてるアイテムの数
-        self.bucket_count = 0 #埋まってる(先頭がNoneじゃない)ハッシュの数
 
     def internal_put(self, key, value):
         assert type(key) == str
         bucket_index = calculate_hash(key) % self.bucket_size
         item = self.buckets[bucket_index]
-        if item == None:
-            self.bucket_count += 1
         while item:
             if item.key == key:
                 item.value = value
@@ -70,36 +67,50 @@ class HashTable:
         self.item_count += 1
         return True
 
-    def expand_Hash_table(self):
+    def expand_hash_table(self):
         origin_bucket_size = self.bucket_size
         origin_buckets = self.buckets
-        self.bucket_size = nextprime(self.bucket_size)
-        self.buckets = [None] * self.bucket_size
-        self.bucket_count = 0
-        self.item_count = 0
-        for i in range(origin_bucket_size):
-            item = origin_buckets[i]
-            while item:
-                self.internal_put(item.key, item.value)
-                item = item.next
-
-    def shrink_Hash_table(self):
-        origin_bucket_size = self.bucket_size
-        origin_buckets = self.buckets
-        self.bucket_size = prevprime(self.bucket_size)
+        self.bucket_size = nextprime((self.bucket_size * 2))
         self.buckets = [None] * self.bucket_size
         bucket_ratio = self.item_count / self.bucket_size
-        if bucket_ratio >= 0.7:
-            pass
+        if bucket_ratio <= 0.3:
+            self.bucket_size = origin_bucket_size
+            self.buckets = origin_buckets
+            return
         else:
-            self.bucket_count = 0
             self.item_count = 0
             for i in range(origin_bucket_size):
                 item = origin_buckets[i]
                 while item:
                     self.internal_put(item.key, item.value)
-                    print(f"文字数：{self.item_count} なんの文字:{item.key}")
                     item = item.next
+
+    def shrink_hash_table(self):
+        origin_bucket_size = self.bucket_size
+        origin_buckets = self.buckets
+        self.bucket_size = prevprime((self.bucket_size//2))
+        if self.bucket_size <= 10:
+            self.bucket_size = 11
+        self.buckets = [None] * self.bucket_size
+        bucket_ratio = self.item_count / self.bucket_size
+        if bucket_ratio >= 0.7:
+            self.bucket_size = origin_bucket_size
+            self.buckets = origin_buckets
+            return
+        else:
+            self.item_count = 0
+            for i in range(origin_bucket_size):
+                item = origin_buckets[i]
+                while item:
+                    self.internal_put(item.key, item.value)
+                    item = item.next
+
+    def rehash_table(self):
+        bucket_ratio = self.item_count / self.bucket_size
+        if bucket_ratio >= 0.7:
+            self.expand_hash_table()
+        elif bucket_ratio <= 0.3:
+            self.shrink_hash_table()
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -113,12 +124,6 @@ class HashTable:
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
         item = self.buckets[bucket_index]
-        if item == None:
-            self.bucket_count += 1
-        else:
-            bucket_ratio = self.bucket_count / self.bucket_size
-            if bucket_ratio >= 0.7:
-                self.expand_Hash_table()
         while item:
             if item.key == key:
                 item.value = value
@@ -127,6 +132,7 @@ class HashTable:
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
+        self.rehash_table()
         return True
 
     # Get an item from the hash table.
@@ -164,14 +170,10 @@ class HashTable:
                 if not prev_item:
                     self.buckets[bucket_index] = next_item
                     self.item_count -= 1
-                    if next_item == None:
-                        self.bucket_count -= 1
-                        bucket_ratio = self.bucket_count / self.bucket_size
-                        if bucket_ratio <= 0.3:
-                            self.shrink_Hash_table()
                 else:
                     prev_item.next = next_item
                     self.item_count -= 1
+                self.rehash_table()
                 return True
             prev_item = item
             item = item.next

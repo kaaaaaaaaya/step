@@ -66,10 +66,10 @@ def calculation_mult_div(tokens,index,minus):
         result = tokens[index - 2 - minus]['number'] * positive / tokens[index]['number']
     tokens[index - 2 - minus: index + 1] = [{'type': 'NUMBER', 'number': result}]
     if minus == 1:
-        index -= 2
+        index -= 3
         return index
     else:
-        index -= 1
+        index -= 2
         return index
 
 def calculation_plus_minus(tokens,index,minus, answer):

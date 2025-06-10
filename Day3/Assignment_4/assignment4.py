@@ -111,6 +111,12 @@ def calculation_mult_div(tokens,index,minus):
         assert tokens[index]['number'] != 0, 'Cannot be devided by 0'
         result = tokens[index - 2 - minus]['number'] * positive / tokens[index]['number']
     tokens[index - 2 - minus: index + 1] = [{'type': 'NUMBER', 'number': result}]
+    if minus == 1:
+        index -= 2
+        return index
+    else:
+        index -= 1
+        return index
 
 def calculation_plus_minus(tokens,index,minus, answer):
     positive = 1
@@ -128,9 +134,9 @@ def evaluate(tokens):
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
             if tokens[index - 1]['type'] == 'MINUS' and tokens[index - 2]['type'] in {"MULT", "DIV"}:
-                calculation_mult_div(tokens, index, 1)
+                index = calculation_mult_div(tokens, index, 1)
             elif tokens[index - 1]['type'] in {"MULT", "DIV"}:
-                calculation_mult_div(tokens, index, 0)
+                index = calculation_mult_div(tokens, index, 0)
         index += 1
 
     # + - の計算

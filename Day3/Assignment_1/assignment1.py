@@ -65,6 +65,12 @@ def calculation_mult_div(tokens,index,minus):
         assert tokens[index]['number'] != 0, 'Cannot be devided by 0'
         result = tokens[index - 2 - minus]['number'] * positive / tokens[index]['number']
     tokens[index - 2 - minus: index + 1] = [{'type': 'NUMBER', 'number': result}]
+    if minus == 1:
+        index -= 2
+        return index
+    else:
+        index -= 1
+        return index
 
 def calculation_plus_minus(tokens,index,minus, answer):
     positive = 1
@@ -77,14 +83,17 @@ def calculation_plus_minus(tokens,index,minus, answer):
     return answer
 
 def evaluate(tokens):
+    # * / の計算
     index = 0
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
             if tokens[index - 1]['type'] == 'MINUS' and tokens[index - 2]['type'] in {"MULT", "DIV"}:
-                calculation_mult_div(tokens, index, 1)
+                index = calculation_mult_div(tokens, index, 1)
             elif tokens[index - 1]['type'] in {"MULT", "DIV"}:
-                calculation_mult_div(tokens, index, 0)
+                index = calculation_mult_div(tokens, index, 0)
         index += 1
+
+    # + - の計算
     index = 1
     tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
     answer = 0
@@ -131,6 +140,9 @@ def run_test():
     test("2*-4") #かける数が負の数
     test("-10*20") #かけられる数が負の数
 
+    test("1*2*3")#複数回かける
+    test("1*-2*3")#複数回かける(負)
+
     test("12020*0") #0をかける
     test("0*103") #0にかける
 
@@ -150,14 +162,22 @@ def run_test():
     test("4/9") #1桁/1桁
     test("20/400") #2桁/3桁
 
-    test("12*-2") #割る数が負の数
-    test("-15*6") #割られる数が負の数
+    test("12/-2") #割る数が負の数
+    test("-15/6") #割られる数が負の数
+
+    test("8/4/2")#複数回割る
+    test("-8/4/2")#複数回割る(負)
 
     test_division_by_zero() #0で割る
     test("0/103") #0を割る
      
     test("5.555/1.23") #小数
     test("5.5/1.2345") #桁違い
+
+    #掛け算と割り算
+    test("6/3*2*6/8/2") 
+    test("6/3*2+6/8")
+
     print("==== Test finished! ====\n")
 
 run_test()

@@ -5,20 +5,24 @@ find_shortest_path() 関数を書いて、あるページから別のページ�
 「渋谷」から「小野妹子」にどうたどり着く？
 
 ## 考え方
-1. 幅優先で探索する
+1. タイトルのIDを取得する
+    1. pages_xxx.txtをタイトルに対して昇順にソートする
+    2. タイトルを引数に取り、2分探索をおこなう。
+    3. タイトルがみつかれば、そのタイトルに対応するIDを返す
+2. 幅優先で探索する
     1. スタートのノードをキューに入れる。
     2. キューの先頭から1つ取り出し、それをvとする。
     3. vを訪問済みにする。
     4. 「vから辿れる」かつ「未訪問」のノードをキューに追加する。
     5. キューがからでなければ2に戻り、「キューが空になる」または「探索対象が見つかる」まで繰り返す。
 
-2. 探索時に、そのノードがどこからきたノードであるかを保存する
+3. 探索時に、そのノードがどこからきたノードであるかを保存する
     1. related_link という空の配列を用意する。長さは最大のID
     2. 「vから辿れる」かつ「未訪問」のノードをキューに追加する際に、そのノードがvから繋がってきたことを
         related_link[そのノードのID] = v(vのID)
         の形で記録する。
 
-3. 最短距離を辿り出力する
+4. 最短距離を辿り出力する
     1. 目的ノードのIDをanswer配列に格納する
     2. related_link配列を使って目的のノードからスタートノードまで逆順にたどる
         1. ans.append(related_link[現在のノードのID])
@@ -28,9 +32,9 @@ find_shortest_path() 関数を書いて、あるページから別のページ�
 ### 関数の対応表
 |項目|関数名|引数|
 |:---:|:---:|:---:|
-|1| find_shortest_path|(self, start, goal)|
-|2| binary_search|(self,left, right, title, titles)|
-|1| answer|(self, start_id, goal_id, related_link)|
+|1| binary_search|(self,left, right, title, titles)|
+|2| find_shortest_path|(self, start, goal)|
+|4| answer|(self, start_id, goal_id, related_link)|
 
 ## テスト
 - 「渋谷」「小野妹子」
